@@ -21,6 +21,7 @@ class SearchRepoViewController: UIViewController {
     
     var searchText = ""
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -46,22 +47,21 @@ class SearchRepoViewController: UIViewController {
     }
     
     func fetchSearchDatas(searchText:String,page:Int){
-        print(searchText,"T")
+       
         API().getSearchRepo(query: searchText, page: page) { (response, error, code) in
             
             DispatchQueue.main.async {
                 if error == nil {
                     
                     if code == 200 {
-                        
+                        self.indicatorView.stopAnimating()
                         if let res = response, let items = res.items {
                             if items.count > 0 {
+                                
+                                //addDatas&tableViewReload
                                 self.searchDatas.append(contentsOf: items)
                                 self.mainTB.reloadData()
-                                self.indicatorView.stopAnimating()
-                            }
-                            else {
-                                self.indicatorView.stopAnimating()
+                                
                             }
                         }
                         
@@ -113,29 +113,10 @@ class SearchRepoViewController: UIViewController {
 //MARK: - SearchBarDelegate
 extension SearchRepoViewController :UISearchBarDelegate {
     
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-       
-        
-        if Reachability.isConnectedToNetwork(){
-            if searchText != ""{
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-            
-                        //clearSearchData
-                        self.searchDatas.removeAll()
-                        self.indicatorView.startAnimating()
-                        self.searchText = searchText
-                        self.fetchSearchDatas(searchText: searchText, page: 1)
-                
-        }
-        }
-        }
-        else {
-            self.showErrorMessageAlert(message: "No Internet Connection")
-        }
-    }
     
-    
+  
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+       
         self.searchBar.searchTextField.resignFirstResponder()
         if Reachability.isConnectedToNetwork(){
         if let text = searchBar.text, text != "" {
@@ -143,12 +124,13 @@ extension SearchRepoViewController :UISearchBarDelegate {
             self.searchDatas.removeAll()
             self.indicatorView.startAnimating()
             self.searchText = text
-            self.fetchSearchDatas(searchText: text, page: 1)
+            self.fetchSearchDatas(searchText: self.searchText, page: 1)
         }
         }
         else {
             self.showErrorMessageAlert(message: "No Internet Connection")
         }
+        
         
     }
     
